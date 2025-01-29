@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Mini App</title>
+    <title>TON Connect Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://connect.ton.org/tonconnect.js"></script>
     <style>
         * {
             margin: 0;
@@ -24,107 +25,59 @@
             overflow: hidden;
             flex-direction: column;
         }
-        #loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
+        #connectButton {
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        #football {
-            width: 50px;
-            height: 50px;
-            background: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/Football_iu_1996.jpg') no-repeat center;
-            background-size: cover;
-            border-radius: 50%;
-            animation: bounce 1s infinite;
+        #connectButton:hover {
+            background-color: #45a049;
         }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        #content {
+        #connected {
             display: none;
-            text-align: center;
-            padding: 20px;
+            margin-top: 20px;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Loading Screen -->
-    <div id="loading">
-        <div id="football"></div>
-        <p>Loading...</p>
+    <button id="connectButton">Connect Wallet</button>
+    <div id="connected">
+        <p>Wallet connected successfully!</p>
+        <p id="walletAddress"></p>
     </div>
 
-    <!-- Main Content -->
-    <div id="content">
-        <p>Hello, welcome to the Football Mini App!</p>
-        <button id="toggleFullscreen">Toggle Fullscreen</button>
-    </div>
+    <script>
+        // Initialize Telegram WebApp
+        const app = Telegram.WebApp;
 
-    <script defer>
-        document.addEventListener("DOMContentLoaded", () => {
-            if (window.Telegram && Telegram.WebApp) {
-                const app = Telegram.WebApp;
+        // Expand the WebApp to fullscreen
+        app.expand();
+        app.ready();
 
-                // Expand Mini App and request fullscreen
-                app.expand();
-                app.ready();
-                app.requestFullscreen(); // Request fullscreen mode
+        // Initialize TON Connect
+        const tonConnect = new TONConnect();
 
-                // Set header button outside the chat
-                app.setHeaderButton({
-                    text: "Open", // Button text
-                    color: "#ffffff", // Button text color
-                    icon_url: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Football_iu_1996.jpg", // Optional: Icon for the button
-                    callback: function() {
-                        alert("Button clicked!"); // Action when the button is clicked
-                    }
-                });
+        // Handle connect button click
+        document.getElementById('connectButton').addEventListener('click', async () => {
+            try {
+                // Request wallet connection
+                const wallet = await tonConnect.connect();
 
-                // Check Safe Area Insets
-                adjustForSafeArea(app);
-
-                // Event Listeners for Safe Area Updates
-                app.onEvent('safeAreaChanged', () => adjustForSafeArea(app));
-                app.onEvent('contentSafeAreaChanged', () => adjustForSafeArea(app));
-
-                // Show Main Content After Loading
-                setTimeout(() => {
-                    document.getElementById("loading").style.display = "none";
-                    document.getElementById("content").style.display = "block";
-                }, 2000); // Simulated 2-second loading
-
-                // Full-Screen Toggle
-                document.getElementById("toggleFullscreen").addEventListener("click", () => {
-                    if (app.isFullscreen) {
-                        app.exitFullscreen();
-                    } else {
-                        app.requestFullscreen();
-                    }
-                });
-
-                // Listen for Full-Screen Changes
-                app.onEvent("fullscreenChanged", () => {
-                    console.log("Fullscreen Mode:", app.isFullscreen);
-                });
-
-                app.onEvent("fullscreenFailed", () => {
-                    console.log("Fullscreen request failed");
-                });
+                // Display wallet address
+                document.getElementById('walletAddress').textContent = `Wallet Address: ${wallet.address}`;
+                document.getElementById('connected').style.display = 'block';
+                document.getElementById('connectButton').style.display = 'none'; // Hide the connect button
+            } catch (error) {
+                alert('Failed to connect wallet: ' + error.message);
             }
         });
-
-        function adjustForSafeArea(app) {
-            const safeInsets = app.safeAreaInset;
-            document.body.style.paddingTop = `${safeInsets.top}px`;
-            document.body.style.paddingBottom = `${safeInsets.bottom}px`;
-        }
     </script>
 
 </body>
