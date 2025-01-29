@@ -72,11 +72,12 @@
             if (window.Telegram && Telegram.WebApp) {
                 const app = Telegram.WebApp;
 
-                // Expand Mini App
+                // Expand Mini App and request fullscreen
                 app.expand();
                 app.ready();
+                app.requestFullscreen(); // Request fullscreen mode
 
-                // Set header button
+                // Set header button outside the chat
                 app.setHeaderButton({
                     text: "Open", // Button text
                     color: "#ffffff", // Button text color
