@@ -20,6 +20,14 @@
     </style>
 </head>
 <body>
-    <div>Hello Yeah</div>
+    <div>Hello</div>
+
+    <script>
+        // Ensure Telegram WebApp API is loaded
+        if (window.Telegram && Telegram.WebApp) {
+            // Expand the app to full-screen
+            Telegram.WebApp.expand();
+        }
+    </script>
 </body>
 </html>
