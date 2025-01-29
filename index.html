@@ -48,6 +48,8 @@
         }
         #content {
             display: none;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -62,30 +64,66 @@
     <!-- Main Content -->
     <div id="content">
         <p>Hello, welcome to the Football Mini App!</p>
+        <button id="toggleFullscreen">Toggle Fullscreen</button>
     </div>
 
     <script defer>
         document.addEventListener("DOMContentLoaded", () => {
             if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.expand(); // Expand full screen
-                Telegram.WebApp.ready();  // Mark app as ready
-            }
+                const app = Telegram.WebApp;
 
-            // Simulate loading delay
-            setTimeout(() => {
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("content").style.display = "flex";
-            }, 2000); // 2-second loading time
+                // Expand Mini App
+                app.expand();
+                app.ready();
 
-            // Ensure full-screen on all browsers
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) {
-                document.documentElement.msRequestFullscreen();
+                // Set header button
+                app.setHeaderButton({
+                    text: "Open", // Button text
+                    color: "#ffffff", // Button text color
+                    icon_url: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Football_iu_1996.jpg", // Optional: Icon for the button
+                    callback: function() {
+                        alert("Button clicked!"); // Action when the button is clicked
+                    }
+                });
+
+                // Check Safe Area Insets
+                adjustForSafeArea(app);
+
+                // Event Listeners for Safe Area Updates
+                app.onEvent('safeAreaChanged', () => adjustForSafeArea(app));
+                app.onEvent('contentSafeAreaChanged', () => adjustForSafeArea(app));
+
+                // Show Main Content After Loading
+                setTimeout(() => {
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("content").style.display = "block";
+                }, 2000); // Simulated 2-second loading
+
+                // Full-Screen Toggle
+                document.getElementById("toggleFullscreen").addEventListener("click", () => {
+                    if (app.isFullscreen) {
+                        app.exitFullscreen();
+                    } else {
+                        app.requestFullscreen();
+                    }
+                });
+
+                // Listen for Full-Screen Changes
+                app.onEvent("fullscreenChanged", () => {
+                    console.log("Fullscreen Mode:", app.isFullscreen);
+                });
+
+                app.onEvent("fullscreenFailed", () => {
+                    console.log("Fullscreen request failed");
+                });
             }
         });
+
+        function adjustForSafeArea(app) {
+            const safeInsets = app.safeAreaInset;
+            document.body.style.paddingTop = `${safeInsets.top}px`;
+            document.body.style.paddingBottom = `${safeInsets.bottom}px`;
+        }
     </script>
 
 </body>
