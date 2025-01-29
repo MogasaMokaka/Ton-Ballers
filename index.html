@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TON Connect Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://connect.ton.org/tonconnect.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -25,59 +25,69 @@
             overflow: hidden;
             flex-direction: column;
         }
-        #connectButton {
-            padding: 15px 30px;
-            background-color: #4CAF50;
+        #ton-connect {
+            margin-top: 20px;
+        }
+        #walletInfo {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+        #disconnectButton {
+            display: none;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: red;
             color: white;
             border: none;
             border-radius: 5px;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #connectButton:hover {
-            background-color: #45a049;
-        }
-        #connected {
-            display: none;
-            margin-top: 20px;
-            font-size: 20px;
         }
     </style>
 </head>
 <body>
 
-    <button id="connectButton">Connect Wallet</button>
-    <div id="connected">
-        <p>Wallet connected successfully!</p>
+    <h2>TON Wallet Connection</h2>
+    <div id="ton-connect"></div>
+    <div id="walletInfo">
+        <p><strong>Wallet Connected:</strong></p>
         <p id="walletAddress"></p>
+        <button id="disconnectButton">Disconnect Wallet</button>
     </div>
 
     <script>
         // Initialize Telegram WebApp
         const app = Telegram.WebApp;
-
-        // Expand the WebApp to fullscreen
         app.expand();
         app.ready();
 
-        // Initialize TON Connect
-        const tonConnect = new TONConnect();
-
-        // Handle connect button click
-        document.getElementById('connectButton').addEventListener('click', async () => {
-            try {
-                // Request wallet connection
-                const wallet = await tonConnect.connect();
-
-                // Display wallet address
-                document.getElementById('walletAddress').textContent = `Wallet Address: ${wallet.address}`;
-                document.getElementById('connected').style.display = 'block';
-                document.getElementById('connectButton').style.display = 'none'; // Hide the connect button
-            } catch (error) {
-                alert('Failed to connect wallet: ' + error.message);
-            }
+        // Initialize TON Connect UI
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://your-app.com/tonconnect-manifest.json', // Replace with your actual manifest URL
+            buttonRootId: 'ton-connect'
         });
+
+        // Check if the wallet is already connected
+        async function checkWalletConnection() {
+            const connectedWallet = await tonConnectUI.getWallet();
+            if (connectedWallet) {
+                document.getElementById('walletAddress').textContent = `Address: ${connectedWallet.account.address}`;
+                document.getElementById('walletInfo').style.display = 'block';
+                document.getElementById('disconnectButton').style.display = 'block';
+            }
+        }
+
+        // Disconnect Wallet
+        document.getElementById('disconnectButton').addEventListener('click', async () => {
+            await tonConnectUI.disconnect();
+            document.getElementById('walletInfo').style.display = 'none';
+            document.getElementById('disconnectButton').style.display = 'none';
+        });
+
+        // Check connection on load
+        checkWalletConnection();
     </script>
 
 </body>
