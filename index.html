@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Football Prediction Mini App</title>
+    <title>Ton Ballers</title>
     <style>
         /* Reset and Telegram base styles */
         * {
@@ -20,7 +20,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow-y: auto;
+            overflow: hidden; /* Prevent scrolling */
             -webkit-font-smoothing: antialiased;
         }
 
@@ -30,6 +30,11 @@
             padding: 20px;
             width: 100%;
             max-width: 640px; /* Telegram’s typical max width */
+            min-height: 100vh; /* Ensure it takes full height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         .header {
             font-size: 24px;
@@ -39,14 +44,15 @@
             line-height: 1.2;
         }
         .wallet-icon {
-            width: 80px;
-            height: 80px;
+            width: 100%;
+            max-width: 360px; /* Fit your 640x360 image */
+            height: auto;
             margin-bottom: 20px;
             animation: pulse 2s infinite ease-in-out;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         .subtext {
@@ -82,8 +88,7 @@
                 font-size: 14px;
             }
             .wallet-icon {
-                width: 60px;
-                height: 60px;
+                max-width: 300px; /* Adjust for smaller screens */
             }
         }
     </style>
@@ -101,7 +106,7 @@
     <script>
         // TON Connect initialization
         const tonConnectUI = new TONConnectUI({
-            manifestUrl: 'https://yourusername.github.io/football-prediction-mini-app/tonconnect-manifest.json'
+            manifestUrl: 'https://mogasamokaka.github.io/Ton-Ballers/tonconnect-manifest.json'
         });
 
         // DOM elements
@@ -109,6 +114,7 @@
 
         // Telegram Web App setup
         Telegram.WebApp.ready();
+        Telegram.WebApp.expand(); // Ensure full-screen mode
         Telegram.WebApp.MainButton.setParams({
             color: '#2E7D32',
             text_color: '#FFFFFF'
@@ -146,6 +152,7 @@
                         });
                     }
                 } catch (e) {
+                    console.error('TON Connect Error:', e);
                     walletStatus.textContent = 'Connection failed';
                     walletStatus.style.display = 'block';
                     Telegram.WebApp.showPopup({
@@ -155,7 +162,6 @@
                     });
                 }
             } else {
-                // Placeholder for next action (e.g., future screen switch)
                 Telegram.WebApp.showPopup({
                     message: 'Wallet already connected. Proceed to predictions soon!',
                     buttons: [{ text: 'OK', type: 'close' }]
@@ -169,7 +175,6 @@
         });
 
         // Initial setup
-        Telegram.WebApp.expand();
         updateUI(tonConnectUI.wallet);
     </script>
 </body>
