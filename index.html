@@ -2,93 +2,175 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Ballers</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Football Prediction Mini App</title>
     <style>
+        /* Reset and Telegram base styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #FFFFFF);
+            color: var(--tg-theme-text-color, #000000);
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            background-color: #121212;
-            color: white;
-            font-size: 24px;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            flex-direction: column;
+            overflow-y: auto;
+            -webkit-font-smoothing: antialiased;
         }
-        #ton-connect {
-            margin-top: 20px;
-        }
-        #walletInfo {
-            display: none;
-            margin-top: 20px;
-            font-size: 18px;
+
+        /* Wallet Connection Screen */
+        .wallet-screen {
             text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 640px; /* Telegram’s typical max width */
         }
-        #disconnectButton {
-            display: none;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        .header {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--tg-theme-button-color, #2E7D32);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .wallet-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .subtext {
             font-size: 16px;
-            cursor: pointer;
+            color: var(--tg-theme-hint-color, #757575);
+            margin-bottom: 30px;
+            max-width: 300px;
+            line-height: 1.4;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .status {
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #000000);
+            margin-top: 20px;
+            padding: 8px 16px;
+            background: var(--tg-theme-secondary-bg-color, #E0E0E0);
+            border-radius: 8px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+        .status.connected {
+            color: var(--tg-theme-button-color, #2E7D32);
+            background: rgba(46, 125, 50, 0.1); /* Light green tint */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 400px) {
+            .header {
+                font-size: 20px;
+            }
+            .subtext {
+                font-size: 14px;
+            }
+            .wallet-icon {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
-
-    <h2>TON Wallet Connection</h2>
-    <div id="ton-connect"></div>
-    <div id="walletInfo">
-        <p><strong>Wallet Connected:</strong></p>
-        <p id="walletAddress"></p>
-        <button id="disconnectButton">Disconnect Wallet</button>
+    <div class="wallet-screen">
+        <div class="header">Connect Your Wallet</div>
+        <img class="wallet-icon" src="./wallet-banner.png" alt="TON Wallet Icon">
+        <div class="subtext">Link your TON wallet to start predicting football games and earn FOOT tokens!</div>
+        <div class="status" id="walletStatus"></div>
     </div>
 
     <script>
-        // Initialize Telegram WebApp
-        const app = Telegram.WebApp;
-        app.expand();
-        app.ready();
-
-        // Initialize TON Connect UI
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://your-app.com/tonconnect-manifest.json', // Replace with your actual manifest URL
-            buttonRootId: 'ton-connect'
+        // TON Connect initialization
+        const tonConnectUI = new TONConnectUI({
+            manifestUrl: 'https://yourusername.github.io/football-prediction-mini-app/tonconnect-manifest.json'
         });
 
-        // Check if the wallet is already connected
-        async function checkWalletConnection() {
-            const connectedWallet = await tonConnectUI.getWallet();
-            if (connectedWallet) {
-                document.getElementById('walletAddress').textContent = `Address: ${connectedWallet.account.address}`;
-                document.getElementById('walletInfo').style.display = 'block';
-                document.getElementById('disconnectButton').style.display = 'block';
+        // DOM elements
+        const walletStatus = document.getElementById('walletStatus');
+
+        // Telegram Web App setup
+        Telegram.WebApp.ready();
+        Telegram.WebApp.MainButton.setParams({
+            color: '#2E7D32',
+            text_color: '#FFFFFF'
+        });
+
+        // Update button and status
+        function updateUI(wallet) {
+            if (wallet) {
+                const shortAddress = `${wallet.account.address.slice(0, 6)}...${wallet.account.address.slice(-4)}`;
+                walletStatus.textContent = `Connected: ${shortAddress}`;
+                walletStatus.classList.add('connected');
+                walletStatus.style.display = 'block';
+                Telegram.WebApp.MainButton.setText('Continue');
+            } else {
+                walletStatus.textContent = '';
+                walletStatus.classList.remove('connected');
+                walletStatus.style.display = 'none';
+                Telegram.WebApp.MainButton.setText('Connect Wallet');
             }
+            Telegram.WebApp.MainButton.show();
         }
 
-        // Disconnect Wallet
-        document.getElementById('disconnectButton').addEventListener('click', async () => {
-            await tonConnectUI.disconnect();
-            document.getElementById('walletInfo').style.display = 'none';
-            document.getElementById('disconnectButton').style.display = 'none';
+        // Button click handler
+        Telegram.WebApp.MainButton.onClick(async () => {
+            if (!tonConnectUI.connected) {
+                try {
+                    await tonConnectUI.connectWallet();
+                    const wallet = tonConnectUI.wallet;
+                    if (wallet) {
+                        updateUI(wallet);
+                        Telegram.WebApp.showPopup({
+                            title: 'Success',
+                            message: 'Wallet connected! Ready to predict?',
+                            buttons: [{ text: 'OK', type: 'default' }]
+                        });
+                    }
+                } catch (e) {
+                    walletStatus.textContent = 'Connection failed';
+                    walletStatus.style.display = 'block';
+                    Telegram.WebApp.showPopup({
+                        title: 'Error',
+                        message: 'Failed to connect wallet. Try again.',
+                        buttons: [{ text: 'OK', type: 'close' }]
+                    });
+                }
+            } else {
+                // Placeholder for next action (e.g., future screen switch)
+                Telegram.WebApp.showPopup({
+                    message: 'Wallet already connected. Proceed to predictions soon!',
+                    buttons: [{ text: 'OK', type: 'close' }]
+                });
+            }
         });
 
-        // Check connection on load
-        checkWalletConnection();
-    </script>
+        // TON Connect status listener
+        tonConnectUI.onStatusChange(wallet => {
+            updateUI(wallet);
+        });
 
+        // Initial setup
+        Telegram.WebApp.expand();
+        updateUI(tonConnectUI.wallet);
+    </script>
 </body>
 </html>
