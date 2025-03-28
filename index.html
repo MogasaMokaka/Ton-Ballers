@@ -72,17 +72,6 @@
     </div>
 
     <script>
-        // Initialize TON Connect UI
-        const tonConnectUI = new TonConnectUI({
-            manifest: {
-                url: 'https://mogasamokaka.github.io/Ton-Ballers',
-                name: 'Ton Ballers',
-                iconUrl: 'https://mogasamokaka.github.io/Ton-Ballers/wallet-banner.png',
-                termsOfUseUrl: 'https://mogasamokaka.github.io/Ton-Ballers/terms',
-                privacyPolicyUrl: 'https://mogasamokaka.github.io/Ton-Ballers/privacy'
-            }
-        });
-
         // DOM elements
         const walletStatus = document.getElementById('walletStatus');
 
@@ -95,62 +84,76 @@
             text: 'Connect Wallet'
         });
 
-        // Update UI based on wallet connection status
-        function updateUI(wallet) {
-            if (wallet) {
-                const shortAddress = `${wallet.account.address.slice(0, 6)}...${wallet.account.address.slice(-4)}`;
-                walletStatus.textContent = `Connected: ${shortAddress}`;
-                walletStatus.classList.add('connected');
-                walletStatus.style.display = 'block';
-                Telegram.WebApp.MainButton.setText('Continue');
-            } else {
-                walletStatus.textContent = '';
-                walletStatus.classList.remove('connected');
-                walletStatus.style.display = 'none';
-                Telegram.WebApp.MainButton.setText('Connect Wallet');
-            }
-            Telegram.WebApp.MainButton.show();
-        }
+        // Fetch manifest and initialize TON Connect UI
+        async function initializeTonConnect() {
+            try {
+                const response = await fetch('./tonconnect-manifest.json');
+                const manifest = await response.json();
 
-        // Handle MainButton click
-        Telegram.WebApp.MainButton.onClick(async () => {
-            if (!tonConnectUI.wallet) {
-                try {
-                    await tonConnectUI.connectWallet();
-                    const wallet = tonConnectUI.wallet;
+                const tonConnectUI = new TonConnectUI({ manifest });
+
+                // Update UI based on wallet connection status
+                function updateUI(wallet) {
                     if (wallet) {
-                        updateUI(wallet);
+                        const shortAddress = `${wallet.account.address.slice(0, 6)}...${wallet.account.address.slice(-4)}`;
+                        walletStatus.textContent = `Connected: ${shortAddress}`;
+                        walletStatus.classList.add('connected');
+                        walletStatus.style.display = 'block';
+                        Telegram.WebApp.MainButton.setText('Continue');
+                    } else {
+                        walletStatus.textContent = '';
+                        walletStatus.classList.remove('connected');
+                        walletStatus.style.display = 'none';
+                        Telegram.WebApp.MainButton.setText('Connect Wallet');
+                    }
+                    Telegram.WebApp.MainButton.show();
+                }
+
+                // Handle MainButton click
+                Telegram.WebApp.MainButton.onClick(async () => {
+                    if (!tonConnectUI.wallet) {
+                        try {
+                            await tonConnectUI.connectWallet();
+                            const wallet = tonConnectUI.wallet;
+                            if (wallet) {
+                                updateUI(wallet);
+                                Telegram.WebApp.showPopup({
+                                    title: 'Success',
+                                    message: 'Wallet connected successfully!',
+                                    buttons: [{ text: 'OK', type: 'default' }]
+                                });
+                            }
+                        } catch (e) {
+                            console.error('TON Connect Error:', e.message || e);
+                            walletStatus.textContent = 'Connection failed';
+                            walletStatus.style.display = 'block';
+                            Telegram.WebApp.showPopup({
+                                title: 'Error',
+                                message: 'Failed to connect wallet. Try again.',
+                                buttons: [{ text: 'OK', type: 'close' }]
+                            });
+                        }
+                    } else {
                         Telegram.WebApp.showPopup({
-                            title: 'Success',
-                            message: 'Wallet connected successfully!',
-                            buttons: [{ text: 'OK', type: 'default' }]
+                            message: 'Wallet already connected.',
+                            buttons: [{ text: 'OK', type: 'close' }]
                         });
                     }
-                } catch (e) {
-                    console.error('TON Connect Error:', e.message || e);
-                    walletStatus.textContent = 'Connection failed';
-                    walletStatus.style.display = 'block';
-                    Telegram.WebApp.showPopup({
-                        title: 'Error',
-                        message: 'Failed to connect wallet. Try again.',
-                        buttons: [{ text: 'OK', type: 'close' }]
-                    });
-                }
-            } else {
-                Telegram.WebApp.showPopup({
-                    message: 'Wallet already connected.',
-                    buttons: [{ text: 'OK', type: 'close' }]
                 });
+
+                // Listen for wallet status changes
+                tonConnectUI.onStatusChange(wallet => {
+                    updateUI(wallet);
+                });
+
+                // Initial UI setup
+                updateUI(tonConnectUI.wallet);
+            } catch (error) {
+                console.error('Failed to initialize TON Connect:', error);
             }
-        });
+        }
 
-        // Listen for wallet status changes
-        tonConnectUI.onStatusChange(wallet => {
-            updateUI(wallet);
-        });
-
-        // Initial UI setup
-        updateUI(tonConnectUI.wallet);
+        initializeTonConnect();
     </script>
 </body>
 </html>
