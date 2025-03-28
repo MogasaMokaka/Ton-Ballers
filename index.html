@@ -93,7 +93,7 @@
         }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
     <div class="wallet-screen">
@@ -104,8 +104,8 @@
     </div>
 
     <script>
-        // TON Connect initialization
-        const tonConnectUI = new TONConnectUI({
+        // Initialize TON Connect UI
+        const tonConnectUI = new TonConnectUI({
             manifestUrl: 'https://mogasamokaka.github.io/Ton-Ballers/tonconnect-manifest.json'
         });
 
@@ -114,13 +114,13 @@
 
         // Telegram Web App setup
         Telegram.WebApp.ready();
-        Telegram.WebApp.expand(); // Ensure full-screen mode
+        Telegram.WebApp.expand();
         Telegram.WebApp.MainButton.setParams({
             color: '#2E7D32',
             text_color: '#FFFFFF'
         });
 
-        // Update button and status
+        // Update UI based on wallet connection status
         function updateUI(wallet) {
             if (wallet) {
                 const shortAddress = `${wallet.account.address.slice(0, 6)}...${wallet.account.address.slice(-4)}`;
@@ -137,9 +137,9 @@
             Telegram.WebApp.MainButton.show();
         }
 
-        // Button click handler
+        // Handle MainButton click
         Telegram.WebApp.MainButton.onClick(async () => {
-            if (!tonConnectUI.connected) {
+            if (!tonConnectUI.wallet) {
                 try {
                     await tonConnectUI.connectWallet();
                     const wallet = tonConnectUI.wallet;
@@ -152,7 +152,7 @@
                         });
                     }
                 } catch (e) {
-                    console.error('TON Connect Error:', e);
+                    console.error('TON Connect Error:', e.message || e);
                     walletStatus.textContent = 'Connection failed';
                     walletStatus.style.display = 'block';
                     Telegram.WebApp.showPopup({
@@ -169,12 +169,12 @@
             }
         });
 
-        // TON Connect status listener
+        // Listen for wallet status changes
         tonConnectUI.onStatusChange(wallet => {
             updateUI(wallet);
         });
 
-        // Initial setup
+        // Initial UI setup
         updateUI(tonConnectUI.wallet);
     </script>
 </body>
