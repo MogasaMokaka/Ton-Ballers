@@ -109,6 +109,38 @@
                 connectButton.style.display = "inline-block";
                 disconnectButton.style.display = "none";
             });
+
+            // Function to enable full-screen mode
+            const enableFullScreen = () => {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen();
+                } else if (docEl.mozRequestFullScreen) { // Firefox
+                    docEl.mozRequestFullScreen();
+                } else if (docEl.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                    docEl.webkitRequestFullscreen();
+                } else if (docEl.msRequestFullscreen) { // IE/Edge
+                    docEl.msRequestFullscreen();
+                }
+            };
+
+            // Automatically enable full-screen mode on load
+            enableFullScreen();
+
+            // Optional: Add a button to toggle full-screen mode
+            const fullScreenButton = document.createElement("button");
+            fullScreenButton.textContent = "Toggle Full-Screen";
+            fullScreenButton.style.padding = "10px 20px";
+            fullScreenButton.style.fontSize = "16px";
+            fullScreenButton.style.margin = "10px";
+            fullScreenButton.style.cursor = "pointer";
+            fullScreenButton.style.border = "none";
+            fullScreenButton.style.borderRadius = "5px";
+            fullScreenButton.style.backgroundColor = "#007bff";
+            fullScreenButton.style.color = "white";
+
+            fullScreenButton.addEventListener("click", enableFullScreen);
+            document.querySelector(".container").appendChild(fullScreenButton);
         });
     </script>
 </body>
