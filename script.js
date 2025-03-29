@@ -19,10 +19,10 @@ connectButton.addEventListener("click", async () => {
         statusText.textContent = "Connecting...";
         
         const wallets = await connector.getWallets();
-        const tonkeeper = wallets.find(w => w.name === "Tonkeeper");
+        const tonkeeper = wallets.find(w => w.name.toLowerCase().includes("tonkeeper"));
         
         if (!tonkeeper) {
-            statusText.textContent = "Tonkeeper not found. Install it!";
+            statusText.textContent = "Tonkeeper wallet not found. Please install it!";
             connectButton.disabled = false;
             return;
         }
@@ -31,7 +31,13 @@ connectButton.addEventListener("click", async () => {
             universalLink: tonkeeper.universalLink,
             bridgeUrl: tonkeeper.bridgeUrl
         });
-        tg.openLink(connectUrl);
+
+        if (connectUrl) {
+            tg.openLink(connectUrl);
+        } else {
+            statusText.textContent = "Failed to generate connection URL.";
+            connectButton.disabled = false;
+        }
     } catch (error) {
         statusText.textContent = "Error connecting: " + error.message;
         connectButton.disabled = false;
