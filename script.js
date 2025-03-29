@@ -2,10 +2,19 @@
 const tg = window.Telegram.WebApp;
 tg.ready();
 
+// Ensure Telegram WebApp expands to full screen
+tg.expand();
+
 // TON Connect SDK
 const connector = new window.TonConnectSDK.TonConnect({
     manifestUrl: "https://mogasamokaka.github.io/Ton-Ballers/tonconnect-manifest.json"
 });
+
+// Add fallback for unsupported browsers
+if (!window.TonConnectSDK) {
+    statusText.textContent = "TON Connect SDK not supported in this browser.";
+    connectButton.disabled = true;
+}
 
 // DOM Elements
 const connectButton = document.getElementById("connectButton");

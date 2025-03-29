@@ -8,12 +8,19 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .container {
     text-align: center;
     width: 100%;
     max-width: 400px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 h1 {
@@ -41,7 +48,7 @@ button {
     cursor: pointer;
     transition: opacity 0.2s ease;
     width: 100%;
-    max-width: 300px;
+    max-width: 80%;
     margin: 10px auto;
     display: block;
 }
