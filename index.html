@@ -114,18 +114,22 @@
             const enableFullScreen = () => {
                 const docEl = document.documentElement;
                 if (docEl.requestFullscreen) {
-                    docEl.requestFullscreen();
+                    docEl.requestFullscreen().catch(err => {
+                        console.error("Full-screen request failed:", err);
+                    });
                 } else if (docEl.mozRequestFullScreen) { // Firefox
                     docEl.mozRequestFullScreen();
                 } else if (docEl.webkitRequestFullscreen) { // Chrome, Safari, Opera
                     docEl.webkitRequestFullscreen();
                 } else if (docEl.msRequestFullscreen) { // IE/Edge
                     docEl.msRequestFullscreen();
+                } else {
+                    console.warn("Full-screen API is not supported by this browser.");
                 }
             };
 
-            // Automatically enable full-screen mode on load
-            enableFullScreen();
+            // Automatically enable full-screen mode on user interaction
+            document.addEventListener("click", enableFullScreen, { once: true });
 
             // Optional: Add a button to toggle full-screen mode
             const fullScreenButton = document.createElement("button");
