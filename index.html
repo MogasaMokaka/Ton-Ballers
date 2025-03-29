@@ -4,7 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Ton Ballers</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Embedded CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            height: 100vh; /* Ensure body takes full viewport height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%; /* Ensure container spans full width */
+            height: 100%; /* Ensure container spans full height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .status-box {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #connectButton, #disconnectButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        #connectButton {
+            background-color: #28a745;
+            color: white;
+        }
+        #disconnectButton {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- TON Connect SDK (Latest Version) -->
@@ -27,13 +75,30 @@
         <button id="disconnectButton" style="display: none;">Disconnect</button>
     </div>
     <script>
-        // Ensure full-screen mode on load
+        // Embedded JavaScript
         document.addEventListener("DOMContentLoaded", () => {
             if (window.Telegram.WebApp.initData) {
                 window.Telegram.WebApp.expand();
             }
+
+            const connectButton = document.getElementById("connectButton");
+            const disconnectButton = document.getElementById("disconnectButton");
+            const status = document.getElementById("status");
+
+            connectButton.addEventListener("click", () => {
+                // Simulate wallet connection
+                status.textContent = "Connected";
+                connectButton.style.display = "none";
+                disconnectButton.style.display = "inline-block";
+            });
+
+            disconnectButton.addEventListener("click", () => {
+                // Simulate wallet disconnection
+                status.textContent = "Not connected";
+                connectButton.style.display = "inline-block";
+                disconnectButton.style.display = "none";
+            });
         });
     </script>
-    <script src="script.js"></script>
 </body>
 </html>
