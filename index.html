@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
-            height: 100vh; /* Ensure body takes full viewport height */
+            height: 100vh; /* Fullscreen height */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,8 +19,8 @@
         .container {
             text-align: center;
             padding: 20px;
-            width: 100%; /* Ensure container spans full width */
-            height: 100%; /* Ensure container spans full height */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -76,7 +76,7 @@
     </div>
     <script>
         // Embedded JavaScript
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             if (window.Telegram.WebApp.initData) {
                 window.Telegram.WebApp.expand();
             }
@@ -85,15 +85,26 @@
             const disconnectButton = document.getElementById("disconnectButton");
             const status = document.getElementById("status");
 
-            connectButton.addEventListener("click", () => {
-                // Simulate wallet connection
-                status.textContent = "Connected";
-                connectButton.style.display = "none";
-                disconnectButton.style.display = "inline-block";
+            // Initialize TON Connect
+            const tonConnect = new TonConnect();
+
+            connectButton.addEventListener("click", async () => {
+                try {
+                    // Request wallet connection
+                    await tonConnect.connectWallet();
+                    const walletInfo = tonConnect.wallet;
+                    status.textContent = `Connected: ${walletInfo.name}`;
+                    connectButton.style.display = "none";
+                    disconnectButton.style.display = "inline-block";
+                } catch (error) {
+                    console.error("Connection failed:", error);
+                    status.textContent = "Connection failed";
+                }
             });
 
             disconnectButton.addEventListener("click", () => {
                 // Simulate wallet disconnection
+                tonConnect.disconnect();
                 status.textContent = "Not connected";
                 connectButton.style.display = "inline-block";
                 disconnectButton.style.display = "none";
